@@ -2,10 +2,11 @@ class Controller
   class Base
     attr_accessor :env, :request, :response
     
-    def initialize(env)
+    def initialize(env, params)
       @env = env
       @request  = Rack::Request.new(env)
       @response = Rack::Response.new
+      request.params.merge!(params)
     end
 
     def render(template = '', **args)

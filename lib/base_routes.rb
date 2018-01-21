@@ -1,6 +1,6 @@
 class BaseRoutes
   
-  attr_reader :routes
+  attr_reader :routes, :bufer_params
 
   def initialize
     @routes = Hash.new { |hash, key| hash[key] = {} }
@@ -23,22 +23,59 @@ class BaseRoutes
   end
 
   def route_for(env)
-    path   = env["PATH_INFO"]
-    method = env["REQUEST_METHOD"].downcase.to_sym
-    routes[method].each do |routes_path, value|
-      case routes_path
+    @bufer_params = {}
+    path          = env["PATH_INFO"]
+    method        = env["REQUEST_METHOD"].downcase.to_sym
+    routes[method].each do |route, value|
+      case route
       when String
-        return Route.new(routes[method][routes_path]) if path == routes_path
+        return Route.new(routes[method][route], @bufer_params) if check_string_path(path, route)
       when Regexp
-        return Route.new(routes[method][routes_path]) if path =~ routes_path
+        return Route.new(routes[method][route]) if path =~ route
       end
     end
     return nil #No route matched
   end
 
   private
+  
   def parse_to(to_string)
     klass, method = to_string.split("#")
     {klass: klass.capitalize, method: method}
   end
+
+  def check_string_path(path, route)
+    return true if path == route
+    args = separation(path, route)
+    return false unless is_param_route?(route) and equal_number_parts?(*args)
+    check_params(*args)
+  end
+
+  def is_param_route?(route)
+    route[/:[^\/]+/] != nil
+  end
+
+  def separation(path, route)
+    path  = path.strip.gsub(/^\/|\/$/, '').split('/')
+    route = route.strip.gsub(/^\/|\/$/, '').split('/')
+    [path, route]
+  end
+
+  def equal_number_parts?(path_parts, route_parts)
+    path_parts.size == route_parts.size
+  end
+
+  def check_params(path_parts, route_parts)
+    route_parts.each_with_index do |part, index|
+      key = part.sub(/^:/, '')
+      if is_param_route?(part)
+        @bufer_params[key] = path_parts[index]
+      else
+        return false if part != path_parts[index]
+      end
+    end
+    true
+  end
 end
+
+
