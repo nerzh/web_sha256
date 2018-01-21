@@ -3,6 +3,7 @@ Start Puma:
 bundle exec puma -C ./config/puma.rb -p 3001
 
 http://websha256.inclouds.com.ua/add_data
+
 http://websha256.inclouds.com.ua/last_blocks/10
 
 This is example of a simple web app like rails.
