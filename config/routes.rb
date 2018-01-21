@@ -4,7 +4,7 @@ module SimpleApp
     # get "/",         to: "main#index"
     # post "/start",   to: "game#start"
 
-    post "/add_data",           to: "main#index"
     get "/last_blocks/:amount", to: "main#index"
+    post "/add_data",           to: "main#create"
   end
 end
