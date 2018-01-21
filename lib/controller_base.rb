@@ -10,7 +10,7 @@ class Controller
 
     def render(template = '', **args)
       if args[:json]
-        response.body = args[:json].to_json
+        response.body = [ args[:json].to_json ]
         return response
       end
 
