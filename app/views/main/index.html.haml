@@ -1,0 +1,11 @@
+.main-content
+  .main-content-title " CODEBREAKER "
+  %form(name="form_start" action="/start" method="POST" )
+    %select.form-control(name="level")
+      %option(value="low") LOW
+      %option(value="normal") NORMAL
+      %option(value="hard") HARD
+    %br
+    %button.btn.btn-success(type="submit") START GAME
+    %br
+    %a.button.btn.btn-primary(href="/st_login") SHOW STATISTIC
