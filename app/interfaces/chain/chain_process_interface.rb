@@ -1,4 +1,4 @@
-module ShaInterface
+module ChainProcessInterface
   include WoodInterface
 
   methods do
