@@ -33,7 +33,7 @@ class Sha
   end
 
   def get_process(amount)
-    get_last_blocks(amount)
+    get_last_blocks_as_linked_list(amount)
   end
 
   def response
@@ -43,9 +43,11 @@ class Sha
   private
 
   def get_last_blocks_as_linked_list(amount)
+    return if firstBlock?
     current_node = read_current_node
     amount.to_i.times do |order|
       @data << current_node
+      break if current_node['previous_block_hash'] == 0
       current_node = base.get_data(current_node['previous_block_hash'])
     end
   end
