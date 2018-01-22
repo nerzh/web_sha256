@@ -5,10 +5,10 @@ class Sha
 
   attr_reader :base, :buffer, :block, :data, :input_data
 
-  BUFFER_NAME  = 'buffer'
-  STORAGE_NAME = 'storage'
-  INDEX_NAME   = 'index'
-  AMOUNT_ITEMS = 5
+  BUFFER_NAME   = 'buffer'
+  INDEX_NAME    = 'index'
+  CURRENT_NODE  = 'current_node'
+  AMOUNT_ITEMS  = 5
 
   def initialize(base)
     @base     = base
@@ -24,7 +24,8 @@ class Sha
     if check_data_size
       write_buffer
     else
-      write_storage
+      write_new_block
+      write_current_node
       indexing
       clear_buffer
     end
@@ -41,21 +42,26 @@ class Sha
 
   private
 
-  def get_last_blocks(amount)
-    index_db   = read_index_db
-    last_index = index_db.size - 1
-    storage_db = read_storage
-    
-    amount.to_i.times do |order| 
-      index = last_index - order
-      break if index < 0
-      @data << storage_db[index_db[index]]
+  def get_last_blocks_as_linked_list(amount)
+    current_node = read_current_node
+    amount.to_i.times do |order|
+      @data << current_node
+      current_node = base.get_data(current_node['previous_block_hash'])
+    end
+  end
+
+  def get_first_blocks(amount)
+    index_db = read_index_db
+    size     = index_db.size
+    amount.to_i.times do |order|
+      break if order == size
+      @data << base.get_data(index_db[order])
     end
   end
 
   def clear_db
     base.clear_data(BUFFER_NAME)
-    base.clear_data(STORAGE_NAME)
+    base.clear_data(CURRENT_NODE)
     base.clear_data(INDEX_NAME)
   end
 
@@ -80,17 +86,11 @@ class Sha
   end
 
   def firstBlock?
-    read_storage.empty?
+    base.get_data(CURRENT_NODE).empty?
   end
 
-  def read_storage
-    base.get_data(STORAGE_NAME)
-  end
-
-  def write_storage
-    db                      = read_storage
-    db[block['block_hash']] = block
-    base.set_data(STORAGE_NAME, db)
+  def write_new_block
+    base.set_data(block['block_hash'], block)
   end
 
   def read_index_db
@@ -100,6 +100,14 @@ class Sha
   def indexing
     sorted_data = read_index_db
     sorted_data.empty? ? base.set_data(INDEX_NAME, [] << block['block_hash']) : base.set_data(INDEX_NAME, sorted_data << block['block_hash'])
+  end
+
+  def read_current_node
+    base.get_data(CURRENT_NODE)
+  end
+
+  def write_current_node
+    base.set_data(CURRENT_NODE, block['block_hash'])
   end
 
   def unix_time
