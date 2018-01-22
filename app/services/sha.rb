@@ -62,9 +62,7 @@ class Sha
   end
 
   def clear_db
-    base.clear_data(BUFFER_NAME)
-    base.clear_data(CURRENT_NODE)
-    base.clear_data(INDEX_NAME)
+    base.client.del(*base.client.keys)
   end
 
   def clear_buffer
@@ -105,7 +103,7 @@ class Sha
   end
 
   def read_current_node
-    base.get_data(CURRENT_NODE)
+    base.get_data( base.get_data(CURRENT_NODE) )
   end
 
   def write_current_node
