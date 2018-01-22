@@ -2,7 +2,7 @@ module DataBase
   class Base
     prepend BaseInterface
 
-    attr_reader :client, :data
+    attr_reader :client
 
     def initialize(client)
       @client = client
