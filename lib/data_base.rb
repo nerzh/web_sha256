@@ -9,19 +9,23 @@ module DataBase
     end
 
     def set_data(key, data)
-      REDIS.set(key.to_s, data.to_json)
+      client.set(key.to_s, data.to_json)
     end
 
     def get_data(key)
-      new_data(REDIS.get(key.to_s)).to_h
+      new_data(client.get(key.to_s)).to_h
     end
 
     def clear_data(key)
-      REDIS.set(key.to_s, "{}")
+      client.set(key.to_s, "{}")
     end
 
     def new_data(data)
       Data.new(data)
+    end
+
+    def delete_all
+      client.del(*client.keys)
     end
   end
 

@@ -17,7 +17,6 @@ module Chain
 
     def initialize(base)
       @base     = base
-      # clear_db; raise ''
       @block    = Chain::Block.new(read_buffer, link_prev_node)
       @data     = []
     end
@@ -67,10 +66,6 @@ module Chain
       end
     end
 
-    def clear_db
-      base.client.del(*base.client.keys)
-    end
-
     def clear_buffer
       base.clear_data(BUFFER_NAME)
     end
@@ -81,10 +76,6 @@ module Chain
 
     def write_buffer
       base.set_data(BUFFER_NAME, block.to_h)
-    end
-
-    def clean_buffer?
-      read_buffer.empty?
     end
 
     def check_data_size
