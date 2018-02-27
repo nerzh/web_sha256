@@ -18,3 +18,4 @@
 /shared/log/*
 /shared/*
 /config/database.yml
+/config/puma.rb

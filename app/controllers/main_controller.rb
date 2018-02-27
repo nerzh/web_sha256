@@ -1,15 +1,13 @@
 class MainController < BaseController
-  def index
-    chain_service = Chain::Process.new( DataBase::Base.new(REDIS) )
-    chain_service.get_process(params['amount'])
+  # def index
+  #   chain_service.get_process(params['amount'])
 
-    render json: { data: chain_service.response, status: 200, body_request: request.body.read }
-  end
+  #   render json: { data: chain_service.response, status: 200, body_request: request.body.read }
+  # end
 
-  def create
-    chain_service = Chain::Process.new( DataBase::Base.new(REDIS) )
-    chain_service.set_process(params['data'])
+  # def create
+  #   chain_service.set_process(params['data'])
     
-    render json: { data: chain_service.response, status: 200, body_request: request.body.read }
-  end
+  #   render json: { data: chain_service.response, status: 200, body_request: request.body.read }
+  # end
 end

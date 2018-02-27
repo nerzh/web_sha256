@@ -11,7 +11,9 @@ class Controller
 
     def render(template = '', **args)
       if args[:json]
+        response.header['Content-Type'] = 'application/json'
         response.body = [ args[:json].to_json ]
+
         return response
       end
 

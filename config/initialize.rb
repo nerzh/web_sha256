@@ -12,7 +12,6 @@ module SimpleApp
     end
   end
 
-  require_all(Dir["./app/interfaces/**/*.rb"])
   require_all(Dir["./config/initializers/*.rb"])
   require_all(Dir["./lib/**/*.rb"])
   require_all(Dir["./app/**/*.rb"])
