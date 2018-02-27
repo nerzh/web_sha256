@@ -12,6 +12,5 @@ module SimpleApp
     
     get  "/blockchain/get_blocks/:num_blocks", to: "blockchain#get_blocks"
     post "/blockchain/receive_update",         to: "blockchain#receive_update"
-    post "/blockchain/t",         to: "blockchain#t"
   end
 end

@@ -1,8 +1,8 @@
 class BaseController < Controller::Base
 
   START_HASH = '0'
-  PORT       = '3003'
-  IP         = '185.86.76.175'
+  PORT       = '80'
+  IP         = '185.86.77.116'
   ID         = IP
   NAME       = 'woodcrust'
 
