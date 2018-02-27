@@ -2,10 +2,8 @@ module SimpleApp
   InstanceRoute.config do
     # Example routes:
     # get "/",         to: "main#index"
-    # post "/start",   to: "game#start"
-
-    get "/last_blocks/:amount",          to: "main#index"
-    post "/add_data",                    to: "main#create"
+    # post "/create",  to: "main#create"
+    # get "/book/:id", to: "main#show"
     
     post "/management/add_transaction",  to: "management#add_transaction"
     post "/management/add_link",         to: "management#add_link"

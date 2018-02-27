@@ -47,13 +47,11 @@ module Chain
     end
 
     def get_blocks(amount)
-      # ChainNet::Http.send_post_data('http://localhost:3001/blockchain/t', {a: {z: 'dsdsdsd', e: 222}, m: [1,2,3] } )
       get_last_blocks_as_linked_list(amount)
     end
 
     def add_link(address)
-      addresses = base.get_data(ADDRESS_NAME, ADDRESS_NAME)
-      base.set_data(ADDRESS_NAME, ADDRESS_NAME, addresses.empty? ? {}.merge({address['id'] => address}) : addresses.merge({address['id'] => address}))
+      write_link(address['id'], address)
       @data = address
     end
 
@@ -66,21 +64,32 @@ module Chain
     end
 
     def receive_update(input_data)
+      input_block = input_data['block'].class == String ? JSON.parse(input_data['block']) : input_data['block']
+      @block      = Chain::Block.new(block: input_block, prev_hash: link_prev_node, alien: true)
 
-      if prev_node.empty? and input_data['block']['hash'] == '0' 
-        add_alien_block(input_data['block'])
-      end
-
-      if input_data['block']['prev_hash'] == prev_node['hash']
-        add_alien_block(input_data['block'])
+      if prev_node.empty? and block.hash == '0'
+        add_alien_block(input_data)
+        @data = block.to_h
         return
       end
 
-      if input_data['block']['prev_hash'] == link_prev_node and input_data['block']['ts'] < prev_node['ts']
+      if block.prev_hash == prev_node['hash']
+        add_alien_block(input_data)
+        @data = block.to_h
+        return
+      end
+
+      if block.prev_hash == link_prev_node and block.ts.to_i < prev_node['ts'].to_i
+
         delete_block(link_prev_node)
-        add_alien_block(input_data['block'])
+        add_alien_block(input_data)
+        @data = block.to_h
       else
-        send_post_data(base.get_data(ADDRESS_NAME)[input_data['sender_id']]['url'] + 'receive_update', block.to_h)
+        raise "#{id} not found the own first block(0) in chain" if prev_node.empty?
+        @data = prev_node
+        link = get_link(input_data['sender_id'])
+        raise "#{input_data['sender_id']} not found in list of adresses" if link.empty?
+        ChainNet::Http.send_post_data(get_link(input_data['sender_id']) << '/receive_update', prev_node)
       end
     end
 
@@ -91,20 +100,27 @@ module Chain
     private
 
     def add_alien_block(input_data)
-      @block = Chain::Block.new(input_data, link_prev_node)
-      add_block_stack
+      addresses   = get_links.keys
+      return unless addresses.include?(input_data['sender_id'])
+
+      add_block_stack(input_data['sender_id'])
       change_buffer_prev_link
     end
 
-    def add_block_stack
+    def add_block_stack(skip='')
       write_new_block
       write_prev_node
-      Thread.start { send_block_to_addresses }
+      Thread.start { send_block_to_all_addresses(skip) }
     end
 
-    def send_block_to_addresses
-      base.get_data(ADDRESS_NAME, ADDRESS_NAME).each do |key, value|
-        ChainNet::Http.send_post_data(value['url'] + '/receive_update', block.to_h)
+    def send_block_to_all_addresses(skip='')
+      get_links.each do |link, value|
+        next if link == skip
+        uri      = "#{value['url']}/blockchain/receive_update"
+        data     = { sender_id: id,  block: block.to_h }
+        response = ChainNet::Http.send_post_data( uri, data )
+
+        delete_link(link) if response == nil or response.code != 200
       end
     end
 
@@ -168,6 +184,22 @@ module Chain
       base.set_data(PREV_NODE, PREV_NODE, block.hash)
     end
 
+    def get_links
+      base.get_hash_all_data(ADDRESS_NAME)
+    end
+
+    def get_link(link)
+      base.get_data(ADDRESS_NAME, link)
+    end
+
+    def write_link(link, data)
+      base.set_data(ADDRESS_NAME, link, data)
+    end
+
+    def delete_link(link)
+      base.clear_data(ADDRESS_NAME, link)
+    end
+
     def firstBlock?(link)
       link == start_hash
     end
@@ -188,11 +220,18 @@ module Chain
   end
 
 
+
+
+
+
+
   class Block
 
     attr_accessor :prev_hash, :tx, :ts, :hash
 
-    def initialize(block: {}, prev_hash: '', start_hash: 0)
+    def initialize(block: {}, prev_hash: '', start_hash: 0, alien: false)
+      check_block(block) if alien
+
       unless block.empty?
         @prev_hash = block['prev_hash']
         @tx        = block['tx']
@@ -226,7 +265,22 @@ module Chain
       hash['hash']      = self.hash
       hash
     end
+
+    private
+
+    def check_block(block)
+      raise 'empty block'                  if block.empty?
+      raise 'prev_hash empty or not found' if block['prev_hash'] == nil or block['prev_hash'].empty?
+      raise 'tx empty or size != 5'        if block['tx'] == nil        or block['tx'].size != 5
+      raise 'ts empty or not found'        if block['ts'] == nil        or block['ts'].empty?
+      raise 'hash empty or not found'      if block['hash'] == nil      or block['hash'].empty?
+    end
   end
+
+
+
+
+
 
   class Balance
     attr_accessor :from, :to, :amount

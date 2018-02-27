@@ -6,12 +6,11 @@ module ChainNet
 
   class Http
 
-    def self.send_post_data(url, data)
+    def self.send_post_data(url, data, ct='application/x-www-form-urlencoded')
       uri    = URI.parse(url)
-      # header = {'Content-Type': 'application/text/json'}
-      header = {'Content-Type': 'application/x-www-form-urlencoded'}
+      header = {'Content-Type': ct}
       # Create the HTTP objects
-      http = Net::HTTP.new(uri.host, uri.port)
+      http    = Net::HTTP.new(uri.host, uri.port)
       request = Net::HTTP::Post.new(uri.request_uri, header)
       
       body = ''
@@ -21,7 +20,9 @@ module ChainNet
       request.body = body
 
       # Send the request
-      response = http.request(request)
+      http.request(request)
+    rescue => ex
+      nil
     end
   end
 end

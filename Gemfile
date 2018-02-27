@@ -7,7 +7,7 @@ gem 'haml'
 gem 'json'
 
 gem 'redis'
-gem 'wood_interface', github: 'woodcrust/wood_interface'
+# gem 'wood_interface', github: 'woodcrust/wood_interface'
 
 group :test do
   gem 'rspec'

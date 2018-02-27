@@ -1,9 +1,9 @@
 class BaseController < Controller::Base
 
   START_HASH = '0'
-  PORT       = '3000'
-  IP         = '192.168.44.94'
-  ID         = 94
+  PORT       = '3003'
+  IP         = '185.86.76.175'
+  ID         = IP
   NAME       = 'woodcrust'
 
   def chain_service
