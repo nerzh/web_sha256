@@ -56,7 +56,7 @@ module Chain
     end
 
     def get_status
-      @data = Status.new(id, name, link_prev_node, base.get_data(ADDRESS_NAME, ADDRESS_NAME), ip, port).to_h
+      @data = Status.new(id, name, link_prev_node, base.get_data(ADDRESS_NAME, ADDRESS_NAME), ip, port, start_hash).to_h
     end
 
     def sync
@@ -296,10 +296,15 @@ module Chain
     end
   end
 
+
+
+
+
+
   class Status
     attr_accessor :id, :name, :last_hash, :neighbours, :url
 
-    def initialize(id, name, link_prev_node, neighbours, ip, port)
+    def initialize(id, name, link_prev_node, neighbours, ip, port, start_hash=0)
       @id         = id
       @name       = name
       @last_hash  = link_prev_node.empty? ? start_hash : link_prev_node

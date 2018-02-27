@@ -8,6 +8,7 @@ module SimpleApp
     post "/management/add_transaction",  to: "management#add_transaction"
     post "/management/add_link",         to: "management#add_link"
     get  "/management/status",           to: "management#status"
+    get  "/management/state",            to: "management#status"
     get  "/management/sync",             to: "management#sync"
     
     get  "/blockchain/get_blocks/:num_blocks", to: "blockchain#get_blocks"
