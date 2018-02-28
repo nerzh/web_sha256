@@ -7,9 +7,8 @@ module ChainNet
   class Http
 
     def self.send_post_data(url, data, ct='application/x-www-form-urlencoded')
-      uri    = URI.parse(url)
-      header = {'Content-Type'=> ct}
-      # Create the HTTP objects
+      uri     = URI.parse(url)
+      header  = {'Content-Type'=> ct}
       http    = Net::HTTP.new(uri.host, uri.port)
       request = Net::HTTP::Post.new(uri.request_uri, header)
       

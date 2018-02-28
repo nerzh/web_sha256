@@ -88,17 +88,16 @@ module Chain
       end
 
       if block.prev_hash == link_prev_node and block.ts.to_i < prev_node['ts'].to_i
-
         delete_block(link_prev_node)
         add_alien_block(input_data)
         @data = block.to_h
       else
         raise "#{id} not found the own first block(0) in chain" if prev_node.empty?
         @data = prev_node
-        url = JSON.parse(get_link(input_data['sender_id']))['url']
+        url = get_link(input_data['sender_id'])['url']
         raise "#{input_data['sender_id']} not found in list of adresses" if url.nil?
         data = { sender_id: id,  block: prev_node }
-        ChainNet::Http.send_post_data( url << '/blockchain/receive_update', prev_node, 'text/plain')
+        ChainNet::Http.send_post_data( url << '/blockchain/receive_update', prev_node, 'application/json')
       end
     end
 
@@ -142,7 +141,7 @@ module Chain
         url      = JSON.parse(value)['url']
         uri      = "#{url}/blockchain/receive_update"
         data     = { sender_id: id,  block: block.to_h }
-        response = ChainNet::Http.send_post_data( uri, data, 'text/plain' )
+        response = ChainNet::Http.send_post_data( uri, data, 'application/json' )
 
         delete_link(link) if response == nil
       end
@@ -213,8 +212,7 @@ module Chain
     end
 
     def get_link(link)
-      link = base.get_data(ADDRESS_NAME, link)
-      link.empty? ? "{}" : link
+      base.get_data(ADDRESS_NAME, link)
     end
 
     def write_link(link, data)

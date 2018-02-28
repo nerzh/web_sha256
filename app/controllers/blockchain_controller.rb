@@ -7,7 +7,7 @@ class BlockchainController < BaseController
   end
 
   def receive_update
-    params = params.empty? ? JSON.parse(request.body.read) : params
+    params = (params.nil? or params.empty?) ? JSON.parse(request.body.read) : params
     chain_service.receive_update(params)
     render json: { success: true, status: 'ok', message: chain_service.response.to_json }
   rescue => ex
