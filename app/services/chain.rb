@@ -95,9 +95,9 @@ module Chain
       else
         raise "#{id} not found the own first block(0) in chain" if prev_node.empty?
         @data = prev_node
-        link = get_link(input_data['sender_id'])
-        raise "#{input_data['sender_id']} not found in list of adresses" if link.empty?
-        ChainNet::Http.send_post_data(get_link(input_data['sender_id']) << '/receive_update', prev_node)
+        url = JSON.parse(get_link(input_data['sender_id']))['url']
+        raise "#{input_data['sender_id']} not found in list of adresses" if url.nil?
+        ChainNet::Http.send_post_data( url << '/blockchain/receive_update', prev_node)
       end
     end
 
@@ -212,7 +212,8 @@ module Chain
     end
 
     def get_link(link)
-      base.get_data(ADDRESS_NAME, link)
+      link = base.get_data(ADDRESS_NAME, link)
+      link.empty? ? "{}" : link
     end
 
     def write_link(link, data)
@@ -295,7 +296,7 @@ module Chain
       raise 'empty block'                  if block.empty?
       raise 'prev_hash empty or not found' if block['prev_hash'] == nil or block['prev_hash'].empty?
       raise 'tx empty or size != 5'        if block['tx'] == nil        or block['tx'].size != 5
-      raise 'ts empty or not found'        if block['ts'] == nil        or block['ts'].empty?
+      raise 'ts empty or not found'        if block['ts'] == nil
       raise 'hash empty or not found'      if block['hash'] == nil      or block['hash'].empty?
     end
   end
