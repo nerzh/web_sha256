@@ -3,7 +3,8 @@ class BaseController < Controller::Base
   START_HASH = '0'
   PORT       = '80'
   IP         = '185.86.77.116'
-  ID         = IP
+  # ID         = IP
+  ID         = 94
   DOMAIN     = 'websha256.inclouds.com.ua'
   NAME       = 'woodcrust'
 
