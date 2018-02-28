@@ -27,8 +27,7 @@ module Chain
       @id         = attrs[:id]
       @name       = attrs[:name]
       @domain     = attrs[:domain]
-      # base.delete_all
-      # raise ''
+      # base.delete_all and raise 'CLEAR'
       @block    = Chain::Block.new(block: read_buffer, prev_hash: link_prev_node)
       @data     = {}
     end
@@ -61,7 +60,14 @@ module Chain
     end
 
     def sync
-      @data = base.get_hash_all_data(CHAIN_NAME).values
+      get_links.each do |link, value|
+        uri      = "#{value['url']}/blockchain/get_blocks/10000"
+        response = ChainNet::Http.send_get_data( uri )
+
+        (delete_link(link); next) if response == nil
+
+        @data = update_own_chain(response, link)
+      end
     end
 
     def receive_update(input_data)
@@ -100,6 +106,20 @@ module Chain
 
     private
 
+    def update_own_chain(response, link)
+      amount_new_blocks = 0
+      data              = JSON.parse(response)
+      last_block        = data.last['prev_hash'] == 0 ? data.first : data.last
+      @block            = Chain::Block.new(block: last_block)
+      add_block_stack(link)
+      data.each do |blok|
+        @block = Chain::Block.new(block: blok)
+        amount_new_blocks += 1 unless get_block(block.hash).hash == ''
+        write_new_block
+      end
+      amount_new_blocks
+    end
+
     def add_alien_block(input_data)
       addresses   = get_links.keys
       return unless addresses.include?(input_data['sender_id'])
@@ -121,19 +141,19 @@ module Chain
         data     = { sender_id: id,  block: block.to_h }
         response = ChainNet::Http.send_post_data( uri, data )
 
-        delete_link(link) if response == nil or response.code != 200
+        delete_link(link) if response == nil
       end
     end
 
     def get_last_blocks_as_linked_list(amount)
       return unless blockExist?
-      @data = Array.new(amount)
+      @data = []
       prev_link = link_prev_node
       amount.times do |num|
-        block = get_block(prev_link).to_h
-        @data[amount-(num+1)] = block
+        block = get_block(prev_link)
+        @data.unshift(block.to_h)
         break if firstBlock?(prev_link)
-        prev_link = block['prev_hash']
+        prev_link = block.prev_hash
       end
     end
 
@@ -202,7 +222,7 @@ module Chain
     end
 
     def firstBlock?(link)
-      link == start_hash
+      link.to_i == start_hash.to_i
     end
 
     def unix_time
@@ -263,7 +283,7 @@ module Chain
       hash['prev_hash'] = prev_hash
       hash['tx']        = tx
       hash['ts']        = ts
-      hash['hash']      = self.hash
+      hash['hash']      = @hash
       hash
     end
 

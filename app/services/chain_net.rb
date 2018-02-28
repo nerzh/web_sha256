@@ -24,5 +24,12 @@ module ChainNet
     rescue => ex
       nil
     end
+
+    def self.send_get_data(url, data={}, headers={})
+      url = URI.parse(url)
+      Net::HTTP.get(url)
+    rescue => ex
+      nil
+    end
   end
 end
