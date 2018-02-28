@@ -11,7 +11,7 @@ module Chain
 
     include ChainNet
 
-    attr_reader :buffer, :block, :data, :input_data, :base, :start_hash, :port, :ip, :id, :name
+    attr_reader :buffer, :block, :data, :input_data, :base, :start_hash, :port, :ip, :id, :name, :domain
 
     BUFFER_NAME   = 'buffer'
     PREV_NODE     = 'prev_node'
@@ -26,6 +26,7 @@ module Chain
       @ip         = attrs[:ip]
       @id         = attrs[:id]
       @name       = attrs[:name]
+      @domain     = attrs[:domain]
       # base.delete_all
       # raise ''
       @block    = Chain::Block.new(block: read_buffer, prev_hash: link_prev_node)
@@ -56,7 +57,7 @@ module Chain
     end
 
     def get_status
-      @data = Status.new(id, name, link_prev_node, base.get_data(ADDRESS_NAME, ADDRESS_NAME), ip, port, start_hash).to_h
+      @data = Status.new(id, name, link_prev_node, base.get_data(ADDRESS_NAME, ADDRESS_NAME), ip, port, start_hash, domain).to_h
     end
 
     def sync
@@ -304,12 +305,12 @@ module Chain
   class Status
     attr_accessor :id, :name, :last_hash, :neighbours, :url
 
-    def initialize(id, name, link_prev_node, neighbours, ip, port, start_hash=0)
+    def initialize(id, name, link_prev_node, neighbours, ip, port, start_hash=0, domain=nil, protocol='http')
       @id         = id
       @name       = name
       @last_hash  = link_prev_node.empty? ? start_hash : link_prev_node
       neighbours.class == Hash ? @neighbours = neighbours.keys : @neighbours = {}
-      @url        = 'http://' << ip << ':' << port
+      @url        = protocol << '://' << (domain ? domain : ip) << ':' << port
     end
 
     def to_h
