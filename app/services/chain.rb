@@ -97,7 +97,8 @@ module Chain
         @data = prev_node
         url = JSON.parse(get_link(input_data['sender_id']))['url']
         raise "#{input_data['sender_id']} not found in list of adresses" if url.nil?
-        ChainNet::Http.send_post_data( url << '/blockchain/receive_update', prev_node)
+        data = { sender_id: id,  block: prev_node }
+        ChainNet::Http.send_post_data( url << '/blockchain/receive_update', prev_node, 'text/plain')
       end
     end
 
@@ -141,7 +142,7 @@ module Chain
         url      = JSON.parse(value)['url']
         uri      = "#{url}/blockchain/receive_update"
         data     = { sender_id: id,  block: block.to_h }
-        response = ChainNet::Http.send_post_data( uri, data )
+        response = ChainNet::Http.send_post_data( uri, data, 'text/plain' )
 
         delete_link(link) if response == nil
       end

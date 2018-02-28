@@ -19,7 +19,7 @@ module ChainNet
         value = (value.class == Array or value.class == Hash) ? value.to_json : value
         body << (body.empty? ? "#{key}=#{value}" : "&#{key}=#{value}")
       end
-      request.body = body
+      ct == 'application/x-www-form-urlencoded' ? request.body = body : request.body = data.to_json
 
       # Send the request
       http.request(request)
