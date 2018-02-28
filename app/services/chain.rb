@@ -61,7 +61,8 @@ module Chain
 
     def sync
       get_links.each do |link, value|
-        uri      = "#{value['url']}/blockchain/get_blocks/10000"
+        url      = JSON.parse(value)['url']
+        uri      = "#{url}/blockchain/get_blocks/10000"
         response = ChainNet::Http.send_get_data( uri )
 
         (delete_link(link); next) if response == nil
