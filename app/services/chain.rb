@@ -56,7 +56,7 @@ module Chain
     end
 
     def get_status
-      @data = Status.new(id, name, link_prev_node, base.get_data(ADDRESS_NAME, ADDRESS_NAME), ip, port, start_hash, domain).to_h
+      @data = Status.new(id, name, link_prev_node, get_links, ip, port, start_hash, domain).to_h
     end
 
     def sync
@@ -329,7 +329,7 @@ module Chain
       @id         = id
       @name       = name
       @last_hash  = link_prev_node.empty? ? start_hash : link_prev_node
-      neighbours.class == Hash ? @neighbours = neighbours.keys : @neighbours = {}
+      @neighbours = neighbours.values.map { |val| JSON.parse(val) }
       @url        = protocol << '://' << (domain ? domain : ip) << ':' << port
     end
 
