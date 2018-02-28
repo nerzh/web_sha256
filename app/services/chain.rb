@@ -138,7 +138,8 @@ module Chain
     def send_block_to_all_addresses(skip='')
       get_links.each do |link, value|
         next if link == skip
-        uri      = "#{value['url']}/blockchain/receive_update"
+        url      = JSON.parse(value)['url']
+        uri      = "#{url}/blockchain/receive_update"
         data     = { sender_id: id,  block: block.to_h }
         response = ChainNet::Http.send_post_data( uri, data )
 
